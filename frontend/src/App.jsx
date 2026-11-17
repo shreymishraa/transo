@@ -8,25 +8,42 @@ function App() {
   const [text, setText] = useState("");
   // Translation API
   const handleTranslate = async (language) => {
-    if (!text.trim()) {
-      alert("Please enter some text.");
-      return;
-    }
-    try {
-      const endpoint =
-        language === "en-hi"
-          ? "english-hindi"
-          : "hindi-english";
-      const response = await axios.post(
-        `http://localhost:5001/api/translate/${endpoint}`,
-        { text }
-      );
+  if (!text.trim()) {
+    alert("Please enter some text.");
+    return;
+  }
+
+  try {
+    const endpoint =
+      language === "en-hi"
+        ? "english-hindi"
+        : "hindi-english";
+
+    const response = await axios.post(
+      `http://localhost:5001/api/translate/${endpoint}`,
+      { text },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.success) {
       setText(response.data.translatedText);
-    } catch (error) {
-      console.error("Translation error:", error);
-      alert("Translation failed. Please try again.");
+    } else {
+      alert(response.data.message || "Translation failed.");
     }
-  };
+
+  } catch (error) {
+    console.error("Translation error:", error.response?.data || error.message);
+
+    alert(
+      error.response?.data?.message ||
+      "Unable to translate. Check your backend server and internet connection."
+    );
+  }
+};
   // Handle Sidebar Actions
   const handleAction = (action) => {
     switch (action) {
@@ -84,4 +101,6 @@ function App() {
     </div>
   );
 }
+
+
 export default App;
